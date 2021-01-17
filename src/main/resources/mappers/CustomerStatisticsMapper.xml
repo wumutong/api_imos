@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mfexcel.bigdata.openapi.mapper.CustomerStatisticsMapper">
+
+
+    <!--运营侧客户统计全部查询-分页查询 视频短信、闪信-->
+    <select id="queryCustomerStatisticsList" parameterType="com.mfexcel.bigdata.openapi.vo.CustomerStatisticsVo"
+            resultType="java.util.Map">
+        SELECT
+        to_char(sent_time,'yyyy-MM-dd hh24:mi:ss')as sentTime,
+        batch_no as batchNo,
+        message_template_name as messageTemplateName,
+        sent_cnt as sentCnt,
+        delivered_terminal_cnt as deliveredTerminalCnt,
+        delivery_impossible_cnt as deliveryImpossibleCnt,
+        unknown_cnt as sendUnknown,
+        cost_cnt as sendBilling,
+        round(delivered_terminal_cnt/sent_cnt,4)  as sendRadio
+        <if test="Customer.msgKind =='2G' or Customer.msgKind =='flash' ">
+            ,message_template_content as messageTemplateContent
+        </if>
+        FROM
+        imos_dev.v_ads_customer_count_data
+        WHERE
+        sent_time &gt;= to_date(#{Customer.dateStart}, 'YYYY-MM-DD')
+        and sent_time &lt; date_trunc('DAY', to_date(#{Customer.dateEnd}, 'YYYY-MM-DD') + interval '1 DAY')
+        and message_type_l1 = #{Customer.msgKind}
+        <if test = "Customer.enterpriseId != null ">
+            and  enterprise_id = #{Customer.enterpriseId}
+        </if>
+    </select>
+
+   <!--运营侧供应商统计全部查询-分页查询视频短信、短信-->
+    <select id="querySupplierStatisticsList" parameterType="com.mfexcel.bigdata.openapi.vo.SupplierStatisticsVo" resultType="java.util.Map">
+        SELECT
+            to_char(sent_time,'yyyy-MM-dd hh24:mi:ss')as sentTime,
+            batch_no as batchNo,
+            enterprise_id as enterpriseId,
+            enterprise_name as enterpriseName,
+            message_template_name as messageTemplateName,
+            operator,
+            supplier_name as supplierName,
+            app_id as appId,
+            supplier_account_name as supplierAccountName,
+            message_sign as messageSign,
+            channel,
+            sent_cnt as sentCnt,
+            delivered_terminal_cnt as deliveredTerminalCnt,
+            delivery_impossible_cnt as deliveryImpossibleCnt,
+            unknown_cnt as sendUnknown,
+            round(delivered_terminal_cnt/sent_cnt,4)  as sendRadio
+            <if test="Statistics.msgKind =='2G' or Statistics.msgKind =='flash'  ">
+                ,message_template_content as messageTemplateContent
+            </if>
+        FROM
+            imos_dev.v_ads_supplier_count_data
+        WHERE
+           sent_time &gt;= to_date(#{Statistics.dateStart}, 'YYYY-MM-DD')
+          and sent_time &lt; date_trunc('DAY', to_date(#{Statistics.dateEnd}, 'YYYY-MM-DD') + interval '1 DAY')
+          and message_type_l1 = #{Statistics.msgKind}
+        <if test = "Statistics.operator != null ">
+            and  operator = #{Statistics.operator}
+        </if>
+        <if test = "Statistics.appId != null ">
+            and  app_id = #{Statistics.appId}
+        </if>
+    </select>
+
+</mapper>

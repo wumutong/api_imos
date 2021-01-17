@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mfexcel.bigdata.openapi.mapper.SendDetailsMapper">
+
+
+
+        <!--客户侧发送详情-分页查询  视频短信、5G消息、闪信、短信 共用接口  customerSentDetail -->
+        <select id="querySendDetailList" parameterType="com.mfexcel.bigdata.openapi.vo.SendDetailsVo"
+                resultType="java.util.Map">
+            SELECT
+            user_num as mobile,
+            message_template_name as templateTitle,
+            sent_result as status,
+            status_type as statusType,
+            message_vars as vars,
+            <if test = "send.msg_kind == '5G'">
+               revoke_result as withdrawalResult,
+            </if>
+            <if test = "send.msg_kind == '2G'">
+                message_template_content as smsContent,
+            </if>
+            status_type_explain as statusTypeExplain,
+            to_char(receipt_time,'yyyy-MM-dd hh24:mi:ss') retTime
+
+            FROM
+            imos_dev.v_ads_user_sent_detailed_record_data
+            WHERE
+
+            message_type_l1=#{send.msg_kind}
+            and batch_no = #{send.send_batch}
+            <if test = "send.status_type != null and (send.msg_kind == '5G' or send.msg_kind == 'video') ">
+                and status_type = #{send.status_type}
+            </if>
+            <if test = "send.mobile != null">
+                AND user_num like concat('%', #{send.mobile}, '%')
+            </if>
+            <if test = "send.status != null">
+                and sent_result = #{send.status}
+            </if>
+            <if test = "send.message_template_content != null" >
+                AND message_template_content like concat('%', #{send.message_template_content}, '%')
+            </if>
+            <if test = "send.revoke_result != null and send.msg_kind == '5G' " >
+                and revoke_result = #{send.revoke_result}
+            </if>
+        </select>
+
+  <!--运营侧侧发送记录全部查询-分页查询 视频短信、5G消息、闪信 共用接口-->
+    <select id="querySentRecordlList" parameterType="com.mfexcel.bigdata.openapi.vo.SendRecordVo"
+            resultType="java.util.Map">
+            SELECT
+            enterprise_id as enterpriseId,
+            enterprise_name as enterpriseName,
+            batch_no as batchNo,
+            message_template_name as messageTemplateName,
+            <if test = "SentRecord.msg_kind == '2G' ">
+                message_template_content,
+            </if>
+
+            <if test = "SentRecord.msg_kind == '5G' ">
+                message_send_account_id as messageSendAccountId,
+                message_send_account_name as messageSendAccountName,
+                sum(message_displayed_cnt) as messageDisplayedCnt,
+            </if>
+            sent_time as sentTime,
+            sum(sent_cnt) as sentCnt,
+            sum(delivered_terminal_cnt) as deliveredTerminalCnt
+
+            <if test = "SentRecord.msg_kind == 'video'  or SentRecord.msg_kind == '2G' ">
+                ,sum(delivery_impossible_cnt) as deliveryImpossibleCnt,
+                sum(unknown_cnt) as sendUnknown
+            </if>
+
+            FROM
+            imos_dev.v_ads_sent_record_data
+            WHERE
+
+        message_type_l1 =#{SentRecord.msg_kind}
+        and sent_time &gt;= to_date(#{SentRecord.date_start}, 'YYYY-MM-DD')
+            and sent_time &lt; date_trunc('DAY', to_date(#{SentRecord.date_end}, 'YYYY-MM-DD') + interval '1 DAY')
+
+            <if test = "SentRecord.messageTemplateName != null ">
+                and  message_template_name = #{SentRecord.messageTemplateName}
+            </if>
+            <if test = "SentRecord.enterpriseId != null ">
+                and  enterprise_id = #{SentRecord.enterpriseId}
+            </if>
+            <if test = "SentRecord.message_template_content != null ">
+                and  message_template_content like  concat('%',#{SentRecord.message_template_content},'%')
+            </if>
+
+            group by
+            enterprise_id,
+            enterprise_name,
+            batch_no,
+            message_template_name,
+            <if test = "SentRecord.msg_kind == '2G' ">
+                message_template_content,
+            </if>
+
+            <if test = "SentRecord.msg_kind == '5G' ">
+                message_send_account_id,
+                message_send_account_name,
+            </if>
+            sent_time
+       </select>
+
+        <!--运营侧发送明细-视频短信、5G消息、闪信、短信 共用接口-->
+    <select id="queryOperationSendingDetailsList" parameterType="com.mfexcel.bigdata.openapi.vo.OperationVo"
+            resultType="java.util.Map">
+           SELECT
+           enterprise_id as enterpriseId,
+           enterprise_name as enterpriseName,
+           user_num as mobile,
+           message_template_name as messageTemplateName,
+           message_vars as vars,
+           <if test = "SendingDetails.msg_kind == '5G' ">
+               message_send_account_id as messageSendAccountId,
+               message_send_account_name as messageSendAccountName,
+           </if>
+           <if test = "SendingDetails.msg_kind == '2G' ">
+               message_template_content as messageTemplateContent,
+           </if>
+           <if test = "SendingDetails.msg_kind == 'flash' ">
+               enterprise_num as enterpriseNum,
+           </if>
+           sent_result as status,
+           status_type as statusType,
+           status_type_explain as statusTypeExplain,
+           to_char(receipt_time,'yyyy-MM-dd hh24:mi:ss')as retTime,
+           channel,
+           operator,
+           supplier_name as supplierName,
+           app_id as appId,
+           supplier_account_name as supplierAccountName,
+           message_sign as messageSign,
+           to_char(sent_time,'yyyy-MM-dd hh24:mi:ss')as sentTime
+           FROM
+           imos_dev.v_ads_user_sent_detailed_record_data
+           WHERE
+
+           message_type_l1=#{SendingDetails.msg_kind}
+           and sent_time &gt;= to_date(#{SendingDetails.date_start}, 'YYYY-MM-DD')
+           and sent_time &lt; date_trunc('DAY', to_date(#{SendingDetails.date_end}, 'YYYY-MM-DD') + interval '1 DAY')
+
+           <if test= "SendingDetails.enterpriseId != null">
+               and enterprise_id = #{SendingDetails.enterpriseId}
+           </if>
+
+           <if test= "SendingDetails.mobile != null">
+               and user_num like concat('%',#{SendingDetails.mobile},'%')
+           </if>
+
+           <if test= "SendingDetails.messageTemplateName != null">
+               and message_template_name = #{SendingDetails.messageTemplateName}
+           </if>
+
+           <if test= "SendingDetails.messageSendAccountId!= null and SendingDetails.msg_kind == '5G'">
+               and message_send_account_id = #{SendingDetails.messageSendAccountId}
+           </if>
+
+           <if test = "SendingDetails.messageTemplateContent != null and SendingDetails.msg_kind == '2G' ">
+               and  message_template_content like concat('%',#{SendingDetails.messageTemplateContent},'%')
+           </if>
+           <if test = "SendingDetails.enterpriseNum != null and SendingDetails.msg_kind == 'flash' ">
+                and  enterprise_num like concat('%',#{SendingDetails.enterpriseNum},'%')
+           </if>
+           <if test= "SendingDetails.status != null">
+               and sent_result = #{SendingDetails.status}
+           </if>
+
+           <if test= "SendingDetails.appId != null">
+               and app_id = #{SendingDetails.appId}
+           </if>
+
+           <if test="SendingDetails.channel != null  and (SendingDetails.msg_kind == 'video' or SendingDetails.msg_kind == '5G' or SendingDetails.msg_kind == '2G')">
+               and channel = #{SendingDetails.channel}
+           </if>
+
+           <if test= "SendingDetails.operator != null ">
+               and operator = #{SendingDetails.operator}
+           </if>
+        ORDER BY sent_time desc
+</select>
+
+
+</mapper>

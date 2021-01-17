@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mfexcel.bigdata.openapi.mapper.ConfigurationMapper">
+
+<!--    <typeAlias type="com.someapp.model.User" alias="User"/>-->
+
+
+    <resultMap id="configurationResultMap" type="ConfigurationDomain">
+        <id property="id" column="id" />
+        <result property="name" column="name"/>
+        <result property="desc" column="desc"/>
+        <result property="content" column="content"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updTIme" column="upd_time"/>
+    </resultMap>
+
+    <select id="getCount" resultType="int">
+        SELECT COUNT(1) FROM TB_DATAAPI_CONFIGURATION
+    </select>
+
+    <select id="listConfiguration" resultMap="configurationResultMap">
+        SELECT
+          `ID`,
+          `NAME`,
+          `DESC`,
+          `CONTENT`,
+          `ADD_TIME`,
+          `UPD_TIME`
+        FROM TB_DATAAPI_CONFIGURATION
+    </select>
+
+    <select id="selectConfiguration" parameterType="long"  resultMap="configurationResultMap">
+        SELECT
+        `ID`,
+        `NAME`,
+        `DESC`,
+        `CONTENT`,
+        `ADD_TIME`,
+        `UPD_TIME`
+        FROM TB_DATAAPI_CONFIGURATION
+        WHERE `ID` = #{id}
+    </select>
+
+    <insert id="insertConfiguration" parameterType="ConfigurationDomain">
+        INSERT INTO
+        TB_DATAAPI_CONFIGURATION(`NAME`, `DESC`, `CONTENT`)
+        VALUES (#{name}, #{desc}, #{content})
+    </insert>
+
+    <insert id="updateConfiguration" parameterType="ConfigurationDomain">
+        UPDATE TB_DATAAPI_CONFIGURATION
+        SET `NAME` = #{name}
+        , `DESC` = #{desc}
+        , `CONTENT` = #{content}
+        WHERE `ID` = #{id}
+    </insert>
+
+    <delete id="deleteConfiguration" parameterType="long">
+        DELETE FROM TB_DATAAPI_CONFIGURATION
+        WHERE `ID` = #{id}
+    </delete>
+
+</mapper>

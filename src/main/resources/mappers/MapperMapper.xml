@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mfexcel.bigdata.openapi.mapper.MapperMapper">
+
+    <resultMap id="mapperDomainResultMap" type="com.mfexcel.bigdata.openapi.domain.MapperDomain">
+        <id property="id" column="mapper_id" />
+        <result property="configurationId" column="mapper_configuration_id"/>
+        <result property="uri" column="mapper_uri"/>
+        <result property="name" column="mapper_name"/>
+        <result property="desc" column="mapper_desc"/>
+        <result property="content" column="mapper_content"/>
+        <result property="enable" column="mapper_enable"/>
+        <result property="addTime" column="mapper_add_time"/>
+        <result property="updTIme" column="mapper_upd_time"/>
+        <association property="configurationDomain" javaType="ConfigurationDomain">
+            <id property="id" column="config_id" />
+            <result property="name" column="config_name"/>
+            <result property="desc" column="config_desc"/>
+            <result property="content" column="config_content"/>
+            <result property="addTime" column="config_add_time"/>
+            <result property="updTIme" column="config_upd_time"/>
+        </association>
+    </resultMap>
+
+    <select id="getCount" resultType="int">
+        SELECT COUNT(1) FROM TB_DATAAPI_MAPPER
+    </select>
+
+    <select id="listMapper" resultMap="mapperDomainResultMap">
+        SELECT
+          A.`ID`                       AS MAPPER_ID
+          , A.`CONFIGURATION_ID`       AS MAPPER_CONFIGURATION_ID
+          , A.`URI`                    AS MAPPER_URI
+          , A.`NAME`                   AS MAPPER_NAME
+          , A.`DESC`                   AS MAPPER_DESC
+          , A.`CONTENT`                AS MAPPER_CONTENT
+          , A.`ENABLE`                 AS MAPPER_ENABLE
+          , A.`ADD_TIME`               AS MAPPER_ADD_TIME
+          , A.`UPD_TIME`               AS MAPPER_UPD_TIME
+          , B.`ID`                     AS CONFIG_ID
+          , B.`NAME`                   AS CONFIG_NAME
+          , B.`DESC`                   AS CONFIG_DESC
+          , B.`CONTENT`                AS CONFIG_CONTENT
+          , B.`ADD_TIME`               AS CONFIG_ADD_TIME
+          , B.`UPD_TIME`               AS CONFIG_UPD_TIME
+        FROM TB_DATAAPI_MAPPER A
+        LEFT OUTER JOIN TB_DATAAPI_CONFIGURATION B
+        ON A.CONFIGURATION_ID = B.ID
+    </select>
+
+    <select id="selectMapper" parameterType="long"  resultMap="mapperDomainResultMap">
+        SELECT
+        A.`ID`                       AS MAPPER_ID
+        , A.`CONFIGURATION_ID`       AS MAPPER_CONFIGURATION_ID
+        , A.`URI`                    AS MAPPER_URI
+        , A.`NAME`                   AS MAPPER_NAME
+        , A.`DESC`                   AS MAPPER_DESC
+        , A.`CONTENT`                AS MAPPER_CONTENT
+        , A.`ENABLE`                 AS MAPPER_ENABLE
+        , A.`ADD_TIME`               AS MAPPER_ADD_TIME
+        , A.`UPD_TIME`               AS MAPPER_UPD_TIME
+        , B.`ID`                     AS CONFIG_ID
+        , B.`NAME`                   AS CONFIG_NAME
+        , B.`DESC`                   AS CONFIG_DESC
+        , B.`CONTENT`                AS CONFIG_CONTENT
+        , B.`ADD_TIME`               AS CONFIG_ADD_TIME
+        , B.`UPD_TIME`               AS CONFIG_UPD_TIME
+        FROM TB_DATAAPI_MAPPER A
+        LEFT OUTER JOIN TB_DATAAPI_CONFIGURATION B
+        ON A.CONFIGURATION_ID = B.ID
+        WHERE A.ID = #{id}
+    </select>
+
+    <insert id="insertMapper" parameterType="MapperDomain">
+        INSERT INTO
+        TB_DATAAPI_MAPPER(`CONFIGURATION_ID`, `URI`, `NAME`, `DESC`, `CONTENT`, `ENABLE`)
+        VALUES (#{configurationId}, #{uri}, #{name}, #{desc}, #{content}, #{enable})
+    </insert>
+
+    <insert id="updateMapper" parameterType="MapperDomain">
+        UPDATE TB_DATAAPI_MAPPER
+        SET `CONFIGURATION_ID` = #{configurationId}
+        , `URI` = #{uri}
+        , `NAME` = #{name}
+        , `DESC` = #{desc}
+        , `CONTENT` = #{content}
+        , `ENABLE` = #{enable}
+        WHERE `ID` = #{id}
+    </insert>
+
+    <delete id="deleteMapper" parameterType="long">
+        DELETE FROM TB_DATAAPI_MAPPER
+        WHERE `ID` = #{id}
+    </delete>
+
+</mapper>

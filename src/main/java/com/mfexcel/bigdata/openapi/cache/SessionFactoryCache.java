@@ -6,5 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SessionFactoryCache {
+    //
     public static Map<String, SqlSessionFactory> factoryMap = new HashMap<>();
 }

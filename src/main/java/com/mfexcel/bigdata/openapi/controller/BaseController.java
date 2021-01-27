@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +56,9 @@ public class BaseController {
                 paramMap.put("_PAGE_", page);
             }
             List<Map<String, Object>> result =  mapper.execute(paramMap);
+            if(result.toString().equals("[null]")){
+                return AjaxResult.success(new ArrayList<>());
+            }
             if (page != null) {
                 page.setRecords(result);
                 return AjaxResult.success(page);
@@ -84,9 +88,9 @@ public class BaseController {
         return null;
     }
 
-   /* @RequestMapping("/_reload")
+    @RequestMapping("/_reload")
     private boolean reload(String uri) {
         loadMapperData.load(-1);
         return true;
-    }*/
+    }
 }

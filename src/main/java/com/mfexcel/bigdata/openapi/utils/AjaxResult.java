@@ -48,7 +48,7 @@ public class AjaxResult extends HashMap<String, Object> {
      * @param msg 返回内容
      * @param data 数据对象
      */
-   public AjaxResult(int code, String msg, Object data)
+    public AjaxResult(int code, String msg, Object data)
     {
         super.put(CODE_TAG, code);
         super.put(MSG_TAG, msg);
@@ -56,11 +56,12 @@ public class AjaxResult extends HashMap<String, Object> {
         {
             super.put(DATA_TAG, data);
         }
-        if (code == 200){
+        if (code == 200 || code == 204){
             super.put(SUCCESS_TAG, true);
         }else{
             super.put(SUCCESS_TAG, false);
         }
+
     }
 
     /**
@@ -105,6 +106,56 @@ public class AjaxResult extends HashMap<String, Object> {
     {
         return new AjaxResult(HttpStatus.SUCCESS, msg, data);
     }
+
+
+    /**
+     *
+     * @param data
+     * @return 204 无数据消息
+     */
+
+    public static AjaxResult no_content(Object data)
+    {
+        return AjaxResult.no_content("无内容", data);
+    }
+
+
+    /**
+     *
+     * @param msg
+     * @param data
+     * @return
+     */
+    public static AjaxResult no_content(String msg, Object data)
+    {
+        return new AjaxResult(HttpStatus.NO_CONTENT, msg, data);
+    }
+
+
+
+    /**
+     *
+     * @param data
+     * @return 304 不能得到修改
+     */
+
+    public static AjaxResult NOT_MODIFIED(Object data)
+    {
+        return AjaxResult.NOT_MODIFIED("已有相同数据！", data);
+    }
+
+
+    /**
+     *
+     * @param msg
+     * @param data
+     * @return
+     */
+    public static AjaxResult NOT_MODIFIED(String msg, Object data)
+    {
+        return new AjaxResult(HttpStatus.NOT_MODIFIED, msg, data);
+    }
+
 
     /**
      * 返回错误消息

@@ -1,11 +1,14 @@
 package com.mfexcel.bigdata.openapi.cache;
 
+import com.mfexcel.bigdata.openapi.domain.MapperDomain;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class SessionFactoryCache {
-    //fdf
-    public static Map<String, SqlSessionFactory> factoryMap = new HashMap<>();
+
+    public static Map<String, MapperDomain> mapperDomainMap = new HashMap<>();
+
+    public static Map<Long, SqlSessionFactory> factoryMap = new HashMap<>();
 }
